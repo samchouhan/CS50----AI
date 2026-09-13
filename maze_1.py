@@ -6,6 +6,8 @@ class NODE():
         self.state = state
         self.parent = parent
         
+#The path cost can be found later 
+        
         
 class StackFrontier():
     def __init__(self):
