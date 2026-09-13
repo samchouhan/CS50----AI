@@ -187,3 +187,7 @@ if __name__ == "__main__":
     # Print the solution
     print("Solution:")
     maze.print()
+    
+    
+#RUN it with python maze_1.py maze.txt
+#It shows States Explored: 25
