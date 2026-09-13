@@ -83,3 +83,4 @@ class MAZE:
                  except IndexError:
                      row.append(False)
              self.walls.append(row)
+         self.solution = None
