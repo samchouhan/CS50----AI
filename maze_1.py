@@ -31,3 +31,5 @@ class StackFrontier:
             node = self.frontier[-1]#removed the last item of the list and returned it
             self.frontier = self.frontier[:-1]
             return node
+        
+class QueueFrontier(StackFrontier):
