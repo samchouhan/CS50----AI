@@ -163,3 +163,27 @@ class MAZE:
                  if not frontier.contains_state(state) and state not in self.explored:
                      child = NODE(state=state, parent=node, action=action)
                      frontier.add(child)
+                     
+if __name__ == "__main__":
+
+    # Check command-line arguments
+    if len(sys.argv) != 2:
+        sys.exit("Usage: python maze.py maze.txt")
+
+    # Create the maze
+    maze = MAZE(sys.argv[1])
+
+    # Print the original maze
+    print("Maze:")
+    maze.print()
+
+    # Solve the maze
+    print("Solving...")
+    maze.solve()
+
+    # Print number of states explored
+    print("States Explored:", maze.num_explored)
+
+    # Print the solution
+    print("Solution:")
+    maze.print()
