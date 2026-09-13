@@ -86,3 +86,21 @@ class MAZE:
                     row.append(False)
             self.walls.append(row)
         self.solution = None
+
+    def print(self):
+        solution = self.solution[1] if self.solution is not None else None
+        print()
+        for i in range(self.height):
+            for j in range(self.width):
+                if (i, j) == self.start:
+                    print("A", end="")
+                elif (i, j) == self.goal:
+                    print("B", end="")
+                elif solution is not None and (i, j) in solution:
+                    print("*", end="")
+                elif self.walls[i][j]:
+                    print("█", end="")
+                else:
+                    print(" ", end="")
+            print()
+        print()
