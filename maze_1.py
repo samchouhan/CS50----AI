@@ -33,3 +33,6 @@ class StackFrontier:
             self.frontier = self.frontier[:-1]
             return node
         
+#Class for QueueFrontier, which is a data structure that represents a queue of nodes in a search algorithm. It inherits from the StackFrontier class and overrides the remove method to implement a first-in-first-out (FIFO) structure, where the first node added to the queue is the first one to be removed. This is useful in breadth-first search algorithms, where we want to explore all possible paths at the current depth before moving on to deeper paths.
+#It represents a first-in-first-out (FIFO) structure, where the first node added to the queue is the first one to be removed. This is useful in breadth-first search algorithms, where we want to explore all possible paths at the current depth before moving on to deeper paths.
+
