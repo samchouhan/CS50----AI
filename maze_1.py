@@ -65,4 +65,21 @@ class MAZE:
          self.height = len(contents)
          self.width = max(len(line) for line in contents)
         
-            
+         self.walls = []
+         for i in range(self.height):
+             row = []
+             for j in range(self.width):
+                 try:
+                     if contents[i][j] == "A":
+                         self.start = (i, j)
+                         row.append(False)
+                     elif contents[i][j] == "B":
+                         self.goal = (i, j)
+                         row.append(False)
+                     elif contents[i][j] == " ":
+                         row.append(False)
+                     else:
+                         row.append(True)
+                 except IndexError:
+                     row.append(False)
+             self.walls.append(row)
