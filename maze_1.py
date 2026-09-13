@@ -10,7 +10,8 @@ class NODE:
 
 # The path cost can be found later
 
-
+#Class for StackFrontier    , which is a data structure that represents a stack of nodes in a search algorithm. It has methods to add nodes, check if a state is already in the stack, check if the stack is empty, and remove the last node from the stack.
+#It represents a last-in-first-out (LIFO) structure, where the most recently added node is the first one to be removed. This is useful in depth-first search algorithms, where we want to explore the most recent path before backtracking to previous paths.
 class StackFrontier:
     def __init__(self):
         self.frontier = []
