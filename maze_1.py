@@ -44,3 +44,4 @@ class QueueFrontier(StackFrontier):
             node = self.frontier[0]#removed the first item of the list and returned it
             self.frontier = self.frontier[1:]
             return node
+        
