@@ -1,25 +1,21 @@
-import sys
+from typing import List
 
 
-class NODE:
-    def __init__(self, state, parent, action):
-        self.action = action
-        self.state = state
-        self.parent = parent
+class Node:
+    def __init__(self, state, parent, action, path_cost=0):
+        """
+        Not keeping track of the path cost. This is because the path cost can
+        be calculated at the end.
+        """
+        self.state: tuple = state   # (row, col)
+        self.action: str = action   # "up", "down", "left", "right"
+        self.parent: Node = parent  # Node object
+        self.path_cost: int = path_cost
 
 
-class EmptyFrontierError(EmptyFrontierError):
-    """Raised when attempting to remove a node from an empty frontier."""
-
-
-# The path cost can be found later
-
-
-# Class for StackFrontier    , which is a data structure that represents a stack of nodes in a search algorithm. It has methods to add nodes, check if a state is already in the stack, check if the stack is empty, and remove the last node from the stack.
-# It represents a last-in-first-out (LIFO) structure, where the most recently added node is the first one to be removed. This is useful in depth-first search algorithms, where we want to explore the most recent path before backtracking to previous paths.
-class StackFrontier:
+class StackFronteir:
     def __init__(self):
-        self.frontier = []
+        self.frontier: List[Node] = []
 
     def add(self, node):
         self.frontier.append(node)
@@ -32,47 +28,85 @@ class StackFrontier:
 
     def remove(self):
         if self.empty():
-            raise EmptyFrontierError("empty frontier")
+            raise Exception("Frontier is empty")
         else:
-            node = self.frontier[
-                -1
-            ]  # removed the last item of the list and returned it
+            node = self.frontier[-1]
             self.frontier = self.frontier[:-1]
             return node
 
 
-# Class for QueueFrontier, which is a data structure that represents a queue of nodes in a search algorithm. It inherits from the StackFrontier class and overrides the remove method to implement a first-in-first-out (FIFO) structure, where the first node added to the queue is the first one to be removed. This is useful in breadth-first search algorithms, where we want to explore all possible paths at the current depth before moving on to deeper paths.
-# It represents a first-in-first-out (FIFO) structure, where the first node added to the queue is the first one to be removed. This is useful in breadth-first search algorithms, where we want to explore all possible paths at the current depth before moving on to deeper paths.
-
-
-class QueueFrontier(StackFrontier):
+class QueueFronteir(StackFronteir):
     def remove(self):
         if self.empty():
-            raise EmptyFrontierError("empty frontier")
+            raise Exception("Frontier is empty")
         else:
-            node = self.frontier[
-                0
-            ]  # removed the first item of the list and returned it
+            node = self.frontier[0]
             self.frontier = self.frontier[1:]
             return node
 
 
-class MAZE:
-    def __init__(self, filename):
-        with open(filename) as f:
+# Greedy best-first search using the manhattan distance
+class GreedyBestFirstFronteir(QueueFronteir):
+    def __init__(self, goal):
+        super().__init__()
+        self.goal = goal
+
+    def remove(self):
+        if self.empty():
+            raise Exception("Frontier is empty")
+        else:
+            # Sort the frontier by the manhattan distance
+            self.frontier.sort(
+                key=lambda node:
+                self.manhattan_distance(node.state, self.goal))
+            node = self.frontier[0]
+            self.frontier = self.frontier[1:]
+            return node
+
+    def manhattan_distance(self, state1, state2):
+        return abs(state1[0] - state2[0]) + abs(state1[1] - state2[1])
+
+
+# A* search using the manhattan distance
+class AStarFronteir(GreedyBestFirstFronteir):
+    def __init__(self, goal):
+        super().__init__(goal)
+
+    def remove(self):
+        def _f(node):
+            return self.manhattan_distance(node.state, self.goal) + node.path_cost
+
+        if self.empty():
+            raise Exception("Frontier is empty")
+        else:
+            # Sort the frontier by the manhattan distance
+            self.frontier.sort(
+                key=lambda node: _f(node), reverse=False)
+            node = self.frontier[0]
+            self.frontier = self.frontier[1:]
+            return node
+
+
+class Maze:
+    def __init__(self, file, frontier: StackFronteir):
+        self.frontier = frontier
+        with open(file) as f:
             contents = f.read()
 
+        # Validate start and goal
         if contents.count("A") != 1:
-            raise EmptyFrontierError("maze must have exactly one starting point")
+            raise Exception("Maze must have exactly one start point")
         if contents.count("B") != 1:
-            raise EmptyFrontierError("maze must have exactly one goal")
+            raise Exception("Maze must have exactly one goal")
 
+        # Determine height and width of Maze
         contents = contents.splitlines()
-        self.height = len(contents)
+        self.lenght = len(contents)
         self.width = max(len(line) for line in contents)
 
+        # Keep track of walls
         self.walls = []
-        for i in range(self.height):
+        for i in range(self.lenght):
             row = []
             for j in range(self.width):
                 try:
@@ -89,21 +123,22 @@ class MAZE:
                 except IndexError:
                     row.append(False)
             self.walls.append(row)
+
         self.solution = None
 
     def print(self):
         solution = self.solution[1] if self.solution is not None else None
         print()
-        for i in range(self.height):
-            for j in range(self.width):
-                if (i, j) == self.start:
+        for i, row in enumerate(self.walls):
+            for j, col in enumerate(row):
+                if col:
+                    print("▉", end="")
+                elif (i, j) == self.start:
                     print("A", end="")
                 elif (i, j) == self.goal:
                     print("B", end="")
                 elif solution is not None and (i, j) in solution:
                     print("*", end="")
-                elif self.walls[i][j]:
-                    print("█", end="")
                 else:
                     print(" ", end="")
             print()
@@ -117,34 +152,51 @@ class MAZE:
             ("left", (row, col - 1)),
             ("right", (row, col + 1)),
         ]
+
         result = []
         for action, (r, c) in candidates:
-            if 0 <= r < self.height and 0 <= c < self.width and not self.walls[r][c]:
-                result.append((action, (r, c)))
+            try:
+                if not self.walls[r][c]:
+                    result.append((action, (r, c)))
+            except IndexError:
+                continue
         return result
 
+    def get_frontier(self):
+        # TODO: If added more search algorithms, the structure needs to be changed
+        if self.frontier in [GreedyBestFirstFronteir, AStarFronteir]:
+            frontier = self.frontier(self.goal)
+        else:
+            frontier = self.frontier()
+        return frontier
+
     def solve(self):
-        # Finds a solution to the maze, if one exists.
+        """Find a solution to maze, if one exists."""
 
         # Keep track of number of states explored
         self.num_explored = 0
 
-        # Initialize the frontier to just the starting position
-        start = NODE(state=self.start, parent=None, action=None)
-        frontier = StackFrontier()
-        frontier.add(start)
+        # Initialize frontier to just the starting position
+        start = Node(state=self.start, parent=None, action=None)
+        # checking if it is a greedy best first search
 
+        frontier = self.get_frontier()
+
+        frontier.add(start)
         # Initialize an empty explored set
+        # why a set? No order, no duplicates, fast membership testing
         self.explored = set()
 
         # Keep looping until solution found
         while True:
             # If nothing left in frontier, then no path
             if frontier.empty():
-                raise EmptyFrontierError("no solution")
+                raise Exception("No solution")
 
             # Choose a node from the frontier
             node = frontier.remove()
+
+            node.path_cost += 1
             self.num_explored += 1
 
             # If node is the goal, then we have a solution
@@ -165,34 +217,19 @@ class MAZE:
 
             # Add neighbors to frontier
             for action, state in self.neighbors(node.state):
+                # if not in frotier and state not explored
                 if not frontier.contains_state(state) and state not in self.explored:
-                    child = NODE(state=state, parent=node, action=action)
+                    child = Node(state=state, parent=node,
+                                 action=action, path_cost=node.path_cost+1)
                     frontier.add(child)
 
 
 if __name__ == "__main__":
-    # Check command-line arguments
-    if len(sys.argv) != 2:
-        sys.exit("Usage: python maze.py maze.txt")
-
-    # Create the maze
-    maze = MAZE(sys.argv[1])
-
-    # Print the original maze
+    m = Maze("maze4.txt", AStarFronteir)
     print("Maze:")
-    maze.print()
-
-    # Solve the maze
+    m.print()
     print("Solving...")
-    maze.solve()
-
-    # Print number of states explored
-    print("States Explored:", maze.num_explored)
-
-    # Print the solution
+    m.solve()
+    print("States Explored:", m.num_explored)
     print("Solution:")
-    maze.print()
-
-
-# RUN it with python maze_1.py maze.txt
-# It shows States Explored: 25
+    m.print()
