@@ -8,6 +8,10 @@ class NODE:
         self.parent = parent
 
 
+class EmptyFrontierError(EmptyFrontierError):
+    """Raised when attempting to remove a node from an empty frontier."""
+
+
 # The path cost can be found later
 
 
@@ -28,7 +32,7 @@ class StackFrontier:
 
     def remove(self):
         if self.empty():
-            raise Exception("empty frontier")
+            raise EmptyFrontierError("empty frontier")
         else:
             node = self.frontier[
                 -1
@@ -44,7 +48,7 @@ class StackFrontier:
 class QueueFrontier(StackFrontier):
     def remove(self):
         if self.empty():
-            raise Exception("empty frontier")
+            raise EmptyFrontierError("empty frontier")
         else:
             node = self.frontier[
                 0
@@ -59,9 +63,9 @@ class MAZE:
             contents = f.read()
 
         if contents.count("A") != 1:
-            raise Exception("maze must have exactly one starting point")
+            raise EmptyFrontierError("maze must have exactly one starting point")
         if contents.count("B") != 1:
-            raise Exception("maze must have exactly one goal")
+            raise EmptyFrontierError("maze must have exactly one goal")
 
         contents = contents.splitlines()
         self.height = len(contents)
@@ -104,7 +108,7 @@ class MAZE:
                     print(" ", end="")
             print()
         print()
-        
+
     def neighbors(self, state):
         row, col = state
         candidates = [
@@ -118,54 +122,55 @@ class MAZE:
             if 0 <= r < self.height and 0 <= c < self.width and not self.walls[r][c]:
                 result.append((action, (r, c)))
         return result
-    def solve(self):
-         #Finds a solution to the maze, if one exists.
-         
-         #Keep track of number of states explored
-         self.num_explored = 0
-         
-         #Initialize the frontier to just the starting position
-         start = NODE(state=self.start, parent=None, action=None)
-         frontier = StackFrontier()
-         frontier.add(start)
-         
-         #Initialize an empty explored set
-         self.explored = set()
-         
-         #Keep looping until solution found
-         while True:
-             #If nothing left in frontier, then no path
-             if frontier.empty():
-                 raise Exception("no solution")
-             
-             #Choose a node from the frontier
-             node = frontier.remove()
-             self.num_explored += 1
-             
-             #If node is the goal, then we have a solution
-             if node.state == self.goal:
-                 actions = []
-                 cells = []
-                 while node.parent is not None:
-                     actions.append(node.action)
-                     cells.append(node.state)
-                     node = node.parent
-                 actions.reverse()
-                 cells.reverse()
-                 self.solution = (actions, cells)
-                 return
-             
-             #Mark node as explored
-             self.explored.add(node.state)
-             
-             #Add neighbors to frontier
-             for action, state in self.neighbors(node.state):
-                 if not frontier.contains_state(state) and state not in self.explored:
-                     child = NODE(state=state, parent=node, action=action)
-                     frontier.add(child)
-                     
-if __name__ == "__main__":
 
+    def solve(self):
+        # Finds a solution to the maze, if one exists.
+
+        # Keep track of number of states explored
+        self.num_explored = 0
+
+        # Initialize the frontier to just the starting position
+        start = NODE(state=self.start, parent=None, action=None)
+        frontier = StackFrontier()
+        frontier.add(start)
+
+        # Initialize an empty explored set
+        self.explored = set()
+
+        # Keep looping until solution found
+        while True:
+            # If nothing left in frontier, then no path
+            if frontier.empty():
+                raise EmptyFrontierError("no solution")
+
+            # Choose a node from the frontier
+            node = frontier.remove()
+            self.num_explored += 1
+
+            # If node is the goal, then we have a solution
+            if node.state == self.goal:
+                actions = []
+                cells = []
+                while node.parent is not None:
+                    actions.append(node.action)
+                    cells.append(node.state)
+                    node = node.parent
+                actions.reverse()
+                cells.reverse()
+                self.solution = (actions, cells)
+                return
+
+            # Mark node as explored
+            self.explored.add(node.state)
+
+            # Add neighbors to frontier
+            for action, state in self.neighbors(node.state):
+                if not frontier.contains_state(state) and state not in self.explored:
+                    child = NODE(state=state, parent=node, action=action)
+                    frontier.add(child)
+
+
+if __name__ == "__main__":
     # Check command-line arguments
     if len(sys.argv) != 2:
         sys.exit("Usage: python maze.py maze.txt")
@@ -187,7 +192,7 @@ if __name__ == "__main__":
     # Print the solution
     print("Solution:")
     maze.print()
-    
-    
-#RUN it with python maze_1.py maze.txt
-#It shows States Explored: 25
+
+
+# RUN it with python maze_1.py maze.txt
+# It shows States Explored: 25
