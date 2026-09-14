@@ -1,4 +1,5 @@
 from typing import List
+from PIL import Image, ImageDraw
 
 
 class Node:
@@ -225,11 +226,12 @@ class Maze:
 
 
 if __name__ == "__main__":
-    m = Maze("maze4.txt", AStarFronteir)
-    print("Maze:")
+    filename = input("Enter maze filename: ")
+    m = Maze(filename, AStarFronteir)
     m.print()
     print("Solving...")
     m.solve()
     print("States Explored:", m.num_explored)
     print("Solution:")
     m.print()
+    

@@ -7,7 +7,9 @@ authors = [
     { name = "samchouhan", email = "sakshamchouhan8@gmail.com" }
 ]
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "pillow>=12.3.0",
+]
 
 [project.scripts]
 cs50-ai = "cs50_ai:main"
