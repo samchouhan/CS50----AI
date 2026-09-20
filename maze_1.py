@@ -12,7 +12,7 @@ class Node:
         self.action: str = action   # "up", "down", "left", "right"
         self.parent: Node = parent  # Node object
         self.path_cost: int = path_cost
-
+#This class defines the algorithm used to move to next node
 
 class StackFronteir:
     def __init__(self):
