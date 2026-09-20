@@ -35,7 +35,8 @@ class StackFronteir:
             self.frontier = self.frontier[:-1]
             return node
 
-
+#Another way of solving the maze with different algorithm
+#This time it has the properties of the StackFrontier class except the remove function(method)
 class QueueFronteir(StackFronteir):
     def remove(self):
         if self.empty():
