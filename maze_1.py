@@ -88,7 +88,7 @@ class AStarFronteir(GreedyBestFirstFronteir):
             self.frontier = self.frontier[1:]
             return node
 
-
+#Main maze class
 class Maze:
     def __init__(self, file, frontier: StackFronteir):
         self.frontier = frontier
