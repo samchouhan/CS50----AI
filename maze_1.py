@@ -1,7 +1,7 @@
 from typing import List
 from PIL import Image, ImageDraw
 
-
+#This class defines a NODE
 class Node:
     def __init__(self, state, parent, action, path_cost=0):
         """
